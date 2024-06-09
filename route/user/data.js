@@ -1,28 +1,55 @@
 import sqlite3 from 'sqlite3';
 const SQlite3 = sqlite3.verbose();
 
-// Подключение к БД
-let db = new SQlite3.Database('./route/user/data.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    console.log('Подключение к SQLite базе данных выполнено успешно.');
-});
+function connectBD() {
+    return new SQlite3.Database('./route/user/data.db', 
+    sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+        err ? console.error(err.message) : 
+        console.log('Подключение к SQLite базе данных выполнено успешно.')});
+    };
+
+function getData(quire, db) {
+
+    db.serialize(function() { 
+            // db.run(`CREATE TABLE "USER" IF NOT EXISTS (
+            // "ID"	INTEGER NOT NULL,
+            // "NAME"	TEXT NOT NULL,
+            // PRIMARY KEY("ID" AUTOINCREMENT));`, (err) => { if (err) return; });
+
+            db.each(quire, (err, row) => {
+                if (err) {
+                    console.log(err.message)
+                }
+                row;
+             });
+           });
+}
+
+function closeDB(db) {
+    db.close((err) => {
+        if (err) {
+            return console.error(err.message);
+        }
+        console.log('Соединение с базой данных закрыто.');
+    })
+}
 
 
-console.log(db.run('CREATE TABLE USER IF NOT EXISTS ( ID NUMBER , NAME VARCHAR(100));', (err) => {
-    if (err) return;
-}))
+getData("SELECT * FROM USER", connectBD());
+closeDB(connectBD());
+// db.serialize(() => { 
+    // db.run(`CREATE TABLE "USER" IF NOT EXISTS (
+	// "ID"	INTEGER NOT NULL,
+	// "NAME"	TEXT NOT NULL,
+	// PRIMARY KEY("ID" AUTOINCREMENT));`, (err) => { if (err) return; });
+    
+    // db.each("SELECT * FROM USER", (err, row) => {
+    //     if (err) {
+    //         console.log(err.message)
+    //     }
+    //     console.log(`пользователя с ID ${row.ID} зовуд ${row.NAME}`); 
+    //     dataUser=row; });
 
-db.run("SELECT name FROM sqlite_master WHERE type='table';");
-
-// Закрытие подключения
-db.close((err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    console.log('Соединение с базой данных закрыто.');
-});
 
 
 //
